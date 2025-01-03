@@ -15,13 +15,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up TeXLive
-        uses: dante-ev/texlive-action@v2
-        with:
-          packages: >
-            tikz
-            standalone
-            graphics
+      - name: Install TeXLive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-full imagemagick pdf2svg
 
       - name: Compile to PDF
         run: |
@@ -29,8 +26,7 @@ jobs:
 
       - name: Convert PDF to PNG (White Background)
         run: |
-          apt-get install -y imagemagick
-          convert -density 300 -background white -flatten brother_tze_naming.pdf brother_tze_naming.png
+          convert -density 300 -background white -alpha remove -flatten brother_tze_naming.pdf brother_tze_naming.png
 
       - name: Convert PDF to PNG (Transparent Background)
         run: |
@@ -38,7 +34,6 @@ jobs:
 
       - name: Convert PDF to SVG
         run: |
-          apt-get install -y pdf2svg
           pdf2svg brother_tze_naming.pdf brother_tze_naming.svg
 
       - name: Upload Outputs
