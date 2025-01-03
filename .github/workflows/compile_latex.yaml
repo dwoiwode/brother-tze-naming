@@ -1,0 +1,52 @@
+name: Compile TikZ Figure
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up TeXLive
+        uses: dante-ev/texlive-action@v2
+        with:
+          packages: >
+            tikz
+            standalone
+            graphics
+
+      - name: Compile to PDF
+        run: |
+          pdflatex -interaction=nonstopmode -halt-on-error -shell-escape brother_tze_naming.tex
+
+      - name: Convert PDF to PNG (White Background)
+        run: |
+          apt-get install -y imagemagick
+          convert -density 300 -background white -flatten brother_tze_naming.pdf brother_tze_naming.png
+
+      - name: Convert PDF to PNG (Transparent Background)
+        run: |
+          convert -density 300 brother_tze_naming.pdf brother_tze_naming_transparent.png
+
+      - name: Convert PDF to SVG
+        run: |
+          apt-get install -y pdf2svg
+          pdf2svg brother_tze_naming.pdf brother_tze_naming.svg
+
+      - name: Upload Outputs
+        uses: actions/upload-artifact@v3
+        with:
+          name: tikz-outputs
+          path: |
+            brother_tze_naming.pdf
+            brother_tze_naming.png
+            brother_tze_naming_transparent.png
+            brother_tze_naming.svg
